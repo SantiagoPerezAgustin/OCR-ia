@@ -25,6 +25,7 @@ BackOCRIa/.vs/
 *.exe
 [Dd]ebug/
 [Rr]elease/
+MISTRAL_API_KEY=CHNfy4zlUboLTjiiovghQMSTF2ciWTrm
 
 # Frontend
 node_modules/
@@ -47,3 +48,12 @@ yarn-error.log*
 Thumbs.db
 *.swp
 *.swo
+
+# Archivos locales con secretos (nunca subir)
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+**/appsettings.Local.json
+secrets.json
+**/secrets.json

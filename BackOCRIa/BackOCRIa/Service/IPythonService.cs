@@ -1,3 +1,5 @@
+using BackOCRIa.Models;
+
 namespace BackOCRIa.Services;
 
 public interface IPythonService

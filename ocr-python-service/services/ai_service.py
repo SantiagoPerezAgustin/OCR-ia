@@ -1,6 +1,7 @@
 import os
 import requests
 from typing import Optional
+import json
 
 class AiService:
     def __init__(self):
@@ -85,3 +86,49 @@ class AiService:
         if classification in valid:
             return classification
         return "otro"
+    
+    async def extract_structured_cv_async(self, text: str) -> dict:
+        """
+        Pide a Mistral que extraiga del texto del CV un JSON con nombre, email, teléfono,
+        experiencia, educación y habilidades. Devuelve un diccionario (dict).
+        """
+
+        if not text or len(text.strip()) < 20:
+            return {}
+
+        text_sample = text[:6000] if len(text) > 6000 else text
+
+        prompt = """Extrae del siguiente texto de un CV/currículum y devuelve ÚNICAMENTE un JSON válido, sin markdown ni texto extra.
+El JSON debe tener exactamente estas claves (usa null si no hay dato):
+- "name": string (nombre completo)
+- "email": string
+- "phone": string
+- "experience": array de objetos con "role", "company", "period", "description"
+- "education": array de objetos con "title", "institution", "period"
+- "skills": array de strings
+
+Texto del CV:
+"""
+        payload = {
+            "model": "mistral-small-latest",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt + text_sample
+                }
+            ],
+            "max_tokens": 1500
+        }
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.post(
+            f"{self.base_url}/chat/completions",
+            json=payload,
+            headers=headers
+        )
+        response.raise_for_status()
+        result = response.json()
+        return result["choices"][0]["message"]["content"]

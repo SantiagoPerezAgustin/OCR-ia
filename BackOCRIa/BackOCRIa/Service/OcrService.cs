@@ -41,6 +41,8 @@ namespace BackOCRIa.Service
             }
         }
 
+
+
         private async Task<string> ExtractTextFromImage(Stream imageStream)
         {
             if (!Directory.Exists(_tessDataPath))

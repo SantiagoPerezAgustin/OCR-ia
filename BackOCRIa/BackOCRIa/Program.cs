@@ -1,6 +1,13 @@
-var builder = WebApplication.CreateBuilder(args);
+using BackOCRIa.Data;
+using BackOCRIa.Services;
+using Microsoft.EntityFrameworkCore;
 
-builder.Services.AddControllers();
+var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true);
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

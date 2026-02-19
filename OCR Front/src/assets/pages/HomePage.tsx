@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   DocumentUploader,
   FilePreview,
@@ -65,11 +65,59 @@ const container = {
 };
 
 const PYTHON_API_URL = "http://localhost:8000";
+const NET_API_CANDIDATES = ["http://localhost:5052", "https://localhost:7223"] as const;
+
+// Interfaces para el JSON estructurado
+interface ExperienceItem {
+  role?: string;
+  company?: string;
+  period?: string;
+  description?: string;
+}
+
+interface EducationItem {
+  title?: string;
+  institution?: string;
+  period?: string;
+}
+
+interface StructuredData {
+  name?: string;
+  email?: string;
+  phone?: string;
+  experience?: ExperienceItem[];
+  education?: EducationItem[];
+  skills?: string[];
+}
 
 interface ProcessResult {
   extracted_text: string;
   summary: string;
   classification: string;
+  structured_data?: StructuredData;
+}
+
+// Candidato guardado en la API .NET (la API puede devolver PascalCase: Id, Name, etc.)
+interface Candidate {
+  id: number;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  summary?: string | null;
+  classification?: string | null;
+  createdAt: string;
+}
+
+function normalizeCandidate(raw: Record<string, unknown>): Candidate {
+  return {
+    id: (raw.id ?? raw.Id) as number,
+    name: (raw.name ?? raw.Name ?? "") as string,
+    email: (raw.email ?? raw.Email) as string | null | undefined,
+    phone: (raw.phone ?? raw.Phone) as string | null | undefined,
+    summary: (raw.summary ?? raw.Summary) as string | null | undefined,
+    classification: (raw.classification ?? raw.Classification) as string | null | undefined,
+    createdAt: (raw.createdAt ?? raw.CreatedAt ?? "") as string,
+  };
 }
 
 function HomePage() {
@@ -77,16 +125,64 @@ function HomePage() {
   const [result, setResult] = useState<ProcessResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [candidatesLoading, setCandidatesLoading] = useState(true);
+  const [candidatesError, setCandidatesError] = useState<string | null>(null);
+  const [apiBaseUrl, setApiBaseUrl] = useState<string | null>(null);
+
+  const fetchCandidates = useCallback(async () => {
+    setCandidatesError(null);
+    const basesToTry = apiBaseUrl ? [apiBaseUrl] : [...NET_API_CANDIDATES];
+    for (const base of basesToTry) {
+      try {
+        const res = await fetch(`${base}/api/candidates`);
+        if (!res.ok) continue;
+        const data: unknown[] = await res.json();
+        setCandidates(data.map((raw) => normalizeCandidate(raw as Record<string, unknown>)));
+        setApiBaseUrl(base);
+        setCandidatesLoading(false);
+        return;
+      } catch {
+        continue;
+      }
+    }
+    setCandidatesLoading(false);
+    setCandidatesError("No se pudieron cargar los candidatos. ¿Está corriendo la API .NET en 5052 o 7223?");
+    setCandidates([]);
+  }, [apiBaseUrl]);
+
+  useEffect(() => {
+    fetchCandidates();
+  }, [fetchCandidates]);
+
+  const getApiBase = () => apiBaseUrl ?? NET_API_CANDIDATES[0];
+
+  const deleteCandidate = async (id: number) => {
+    if (id == null || Number.isNaN(Number(id))) return;
+    try {
+      const res = await fetch(`${getApiBase()}/api/candidates/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Error al eliminar");
+      setCandidates((prev) => prev.filter((c) => c.id !== id));
+    } catch {
+      setCandidatesError("No se pudo eliminar el candidato.");
+    }
+  };
 
   const handleFileSelected = (file: File) => {
     setSelectedFile(file);
     setResult(null);
     setError(null);
+    setSaveMessage(null);
   };
   const handleRemoveFile = () => {
     setSelectedFile(null);
     setResult(null);
     setError(null);
+    setSaveMessage(null);
   };
 
   const handleProcess = async () => {
@@ -94,6 +190,7 @@ function HomePage() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setSaveMessage(null);
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
@@ -111,6 +208,47 @@ function HomePage() {
       setError(e instanceof Error ? e.message : "Error al procesar el documento");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveCandidate = async () => {
+    if (!result) return;
+    setSaveMessage(null);
+    try {
+      const structured = result.structured_data;
+      const body = {
+        Name: structured?.name ?? "",
+        Email: structured?.email ?? null,
+        Phone: structured?.phone ?? null,
+        ExperinceJson: structured?.experience
+          ? JSON.stringify(structured.experience)
+          : null,
+        EducationJson: structured?.education
+          ? JSON.stringify(structured.education)
+          : null,
+        SkillsJson: structured?.skills
+          ? JSON.stringify(structured.skills)
+          : null,
+        ExtractedText: result.extracted_text,
+        Summary: result.summary,
+        Classification: result.classification,
+      };
+      const res = await fetch(`${getApiBase()}/api/candidates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("Error al guardar");
+      setSaveMessage({
+        type: "success",
+        text: "Candidato guardado correctamente.",
+      });
+      fetchCandidates();
+    } catch {
+      setSaveMessage({
+        type: "error",
+        text: "No se pudo guardar. ¿Está corriendo la API .NET?",
+      });
     }
   };
 
@@ -177,7 +315,7 @@ function HomePage() {
                   <h4 className="text-sm font-medium uppercase text-slate-500">
                     Texto extraído
                   </h4>
-                  <p className="whitespace-pre-wrap text-sm text-slate-300">
+                  <p className="whitespace-pre-wrap text-sm text-slate-300 max-h-40 overflow-y-auto">
                     {result.extracted_text}
                   </p>
                   <h4 className="text-sm font-medium uppercase text-slate-500">
@@ -188,9 +326,102 @@ function HomePage() {
                     Clasificación
                   </h4>
                   <p className="text-sm text-emerald-400">{result.classification}</p>
+
+                  {result.structured_data && (
+                    <>
+                      <h4 className="text-sm font-medium uppercase text-slate-500 pt-2 border-t border-slate-700/50 mt-4">
+                        Datos estructurados
+                      </h4>
+                      <div className="grid gap-2 text-sm text-slate-300">
+                        {result.structured_data.name != null && result.structured_data.name !== "" && (
+                          <p><span className="text-slate-500">Nombre:</span> {result.structured_data.name}</p>
+                        )}
+                        {result.structured_data.email != null && result.structured_data.email !== "" && (
+                          <p><span className="text-slate-500">Email:</span> {result.structured_data.email}</p>
+                        )}
+                        {result.structured_data.phone != null && result.structured_data.phone !== "" && (
+                          <p><span className="text-slate-500">Teléfono:</span> {result.structured_data.phone}</p>
+                        )}
+                        {result.structured_data.skills != null && result.structured_data.skills.length > 0 && (
+                          <p><span className="text-slate-500">Habilidades:</span> {result.structured_data.skills.join(", ")}</p>
+                        )}
+                      </div>
+                      {result.structured_data.experience != null && result.structured_data.experience.length > 0 && (
+                        <>
+                          <p className="text-slate-500 text-sm font-medium">Experiencia</p>
+                          <ul className="list-disc list-inside space-y-1 text-sm text-slate-300">
+                            {result.structured_data.experience.map((exp, i) => (
+                              <li key={i}>{exp.role ?? "—"} {exp.company ? `en ${exp.company}` : ""} {exp.period ? `(${exp.period})` : ""}</li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                      {result.structured_data.education != null && result.structured_data.education.length > 0 && (
+                        <>
+                          <p className="text-slate-500 text-sm font-medium">Educación</p>
+                          <ul className="list-disc list-inside space-y-1 text-sm text-slate-300">
+                            {result.structured_data.education.map((edu, i) => (
+                              <li key={i}>{edu.title ?? "—"} {edu.institution ? `- ${edu.institution}` : ""} {edu.period ? `(${edu.period})` : ""}</li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        onClick={saveCandidate}
+                        className="mt-4 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors"
+                      >
+                        Guardar candidato
+                      </button>
+                    </>
+                  )}
+
+                  {saveMessage && (
+                    <p className={`text-sm mt-2 ${saveMessage.type === "success" ? "text-emerald-400" : "text-red-400"}`}>
+                      {saveMessage.text}
+                    </p>
+                  )}
                 </motion.div>
               )}
             </motion.div>
+          )}
+        </section>
+
+        <section className="mx-auto max-w-3xl px-6 py-12 border-t border-slate-800/50">
+          <h3 className="text-xl font-bold text-white mb-4">Candidatos guardados</h3>
+          {candidatesLoading ? (
+            <p className="text-slate-500 text-sm">Cargando candidatos…</p>
+          ) : candidatesError ? (
+            <p className="text-red-400 text-sm">{candidatesError}</p>
+          ) : candidates.length === 0 ? (
+            <p className="text-slate-500 text-sm">Aún no hay candidatos guardados. Procesa un CV y pulsa «Guardar candidato».</p>
+          ) : (
+            <ul className="space-y-4">
+              {candidates.map((c) => (
+                <motion.li
+                  key={c.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-slate-700/50 bg-slate-900/30 p-4"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-white truncate">{c.name || "Sin nombre"}</p>
+                    {c.email && <p className="text-sm text-slate-400 truncate">{c.email}</p>}
+                    {c.summary && <p className="text-sm text-slate-500 mt-1 line-clamp-2">{c.summary}</p>}
+                    <p className="text-xs text-slate-600 mt-1">
+                      {new Date(c.createdAt).toLocaleDateString("es-ES", { dateStyle: "short" })}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => deleteCandidate(c.id)}
+                    className="shrink-0 rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-colors"
+                  >
+                    Eliminar
+                  </button>
+                </motion.li>
+              ))}
+            </ul>
           )}
         </section>
 

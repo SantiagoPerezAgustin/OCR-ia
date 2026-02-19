@@ -131,4 +131,18 @@ Texto del CV:
         )
         response.raise_for_status()
         result = response.json()
-        return result["choices"][0]["message"]["content"]
+        content = result["choices"][0]["message"]["content"].strip()
+        if not content:
+            return {}
+        # Quitar markdown si Mistral devuelve ```json ... ```
+        if content.startswith("```"):
+            lines = content.split("\n")
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            content = "\n".join(lines)
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            return {}

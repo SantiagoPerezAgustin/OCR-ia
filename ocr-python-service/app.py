@@ -74,12 +74,21 @@ async def process_document(file: UploadFile = File(...)):
 
         # Extraer datos estructurados del CV
         structured_dict = await ia_service.extract_structured_cv_async(extracted_text)
-        structured_data = StructuredCvData(**structured_dict) # Convierte dict a Pydantic model
+        try:
+            # Normalizar: listas None -> [] para que Pydantic no falle
+            if not isinstance(structured_dict, dict):
+                structured_dict = {}
+            structured_dict = {k: (v if v is not None else ([] if k in ("experience", "education", "skills") else None))
+                              for k, v in structured_dict.items()}
+            structured_data = StructuredCvData(**structured_dict)
+        except Exception:
+            structured_data = StructuredCvData()
 
         return ProcessResponse(
             extracted_text=extracted_text,
             summary=summary,
             classification=classification,
+            structured_data=structured_data,
         )
 
     except Exception as e:

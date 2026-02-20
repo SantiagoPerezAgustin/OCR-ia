@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import {
   DocumentUploader,
   FilePreview,
@@ -412,13 +413,21 @@ function HomePage() {
                       {new Date(c.createdAt).toLocaleDateString("es-ES", { dateStyle: "short" })}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => deleteCandidate(c.id)}
-                    className="shrink-0 rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-colors"
-                  >
-                    Eliminar
-                  </button>
+                  <div className="shrink-0 flex flex-wrap gap-2">
+                    <Link
+                      to={`/candidates/${c.id}/opportunities`}
+                      className="rounded-lg border border-emerald-500/50 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                    >
+                      Ver oportunidades
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => deleteCandidate(c.id)}
+                      className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-colors"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </motion.li>
               ))}
             </ul>

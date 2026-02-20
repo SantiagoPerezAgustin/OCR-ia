@@ -1,4 +1,5 @@
 using BackOCRIa.Data;
+using BackOCRIa.Service;
 using BackOCRIa.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,6 +31,15 @@ builder.Services.AddHttpClient<IPythonService, PythonService>(client =>
     var baseUrl = builder.Configuration["PythonService:BaseUrl"] ?? "http://localhost:8000";
     client.BaseAddress = new Uri(baseUrl);
     client.Timeout = TimeSpan.FromMinutes(5); // OCR puede tardar
+});
+
+
+// Servicio de búsqueda de ofertas (llama a Python /jobs/search)
+builder.Services.AddHttpClient<IJobsSearchService, JobsSearchService>(client =>
+{
+    var baseUrl = builder.Configuration["PythonService:BaseUrl"] ?? "http://localhost:8000";
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromMinutes(2);
 });
 
 // Ya no necesitas estos servicios si todo va a Python:

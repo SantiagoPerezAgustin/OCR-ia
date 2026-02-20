@@ -1,14 +1,22 @@
-import HomePage from './assets/pages/HomePage'
-import './App.css'
-function App() {
+import { Routes, Route } from "react-router-dom";
+import HomePage from "./assets/pages/HomePage";
+import OpportunitiesPage from "./assets/pages/OpportunitiesPage"
+import "./App.css";
 
+function App() {
   return (
     <div className="min-h-screen bg-slate-50">
       <main>
-        <HomePage />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/candidates/:candidateId/opportunities"
+            element={<OpportunitiesPage />}
+          />
+        </Routes>
       </main>
     </div>
   );
 }
 
-export default App
+export default App;

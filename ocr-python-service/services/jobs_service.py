@@ -1,6 +1,11 @@
 import os
 import requests
 from typing import List
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Cargar .env de la carpeta del proyecto (ocr-python-service) aunque uvicorn se ejecute desde otra ruta
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 class JobsService:
     def __init__(self):
@@ -11,6 +16,7 @@ class JobsService:
     def search_jobs(self, query: str, country: str = "gb", max_results: int = 10) -> List[dict]:
         """Busca trabajos en Adzuna. query = 'python developer' o skills."""
         if not self.adzuna_app_id or not self.adzuna_app_key:
+            print("ADVERTENCIA: ADZUNA_APP_ID o ADZUNA_APP_KEY no configurados. No se buscan ofertas.")
             return []
         url = f"{self.base_url}/{country}/search/1"
         params = {

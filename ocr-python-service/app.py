@@ -9,7 +9,8 @@ from services.ai_service import AiService
 import io
 from typing import Optional, List
 from dotenv import load_dotenv
-load_dotenv()
+from pathlib import Path
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 app = FastAPI(title="OCR & AI Processing Service")
 
@@ -129,12 +130,16 @@ async def health():
 async def search_jobs(req: JobsSearchRequest):
     """Busca trabajos en Adzuna."""
     try:
-        query = " ".join(req.skills) if req.skills else ""
-        if req.current_role:
-            query = f"{req.current_role} {query}".strip()
-        if not query.strip():
-            query = "developer"
+        # Búsqueda amplia para Adzuna: 1–2 palabras genéricas = más ofertas. El matching fino lo hace la IA después.
+        query = "developer"
+        if req.current_role and req.current_role.strip():
+            words = req.current_role.strip().split()[:2]  # solo las 2 primeras palabras del rol
+            query = " ".join(words)
+        elif req.skills:
+            # una sola skill principal (la primera), más amplia = más resultados
+            query = req.skills[0].strip() if req.skills[0].strip() else "developer"
         jobs = jobs_service.search_jobs(query, max_results=10)
+        print(f"[jobs/search] query='{query}', jobs_from_adzuna={len(jobs)}")
         if not jobs:
             return JobsSearchResponse(offers=[])
         offers: List[JobsOfferWithMatch] = []

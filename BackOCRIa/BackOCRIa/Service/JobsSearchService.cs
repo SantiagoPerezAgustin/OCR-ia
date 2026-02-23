@@ -1,4 +1,4 @@
-﻿using BackOCRIa.DTO;
+using BackOCRIa.DTO;
 using System.Text.Json;
 
 namespace BackOCRIa.Service

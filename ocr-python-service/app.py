@@ -59,11 +59,6 @@ class JobsSearchRequest(BaseModel):
     skills: List[str] = []
     current_role: Optional[str] = None
 
-class JobsMatchResult(BaseModel):
-    match_percentage: int = 0
-    missing_skills: List[str] = []
-    custom_pitch: str = ""
-
 class JobsOfferWithMatch(BaseModel):
     title: str
     company: str
@@ -163,4 +158,3 @@ async def search_jobs(req: JobsSearchRequest):
         return JobsSearchResponse(offers=offers)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-        

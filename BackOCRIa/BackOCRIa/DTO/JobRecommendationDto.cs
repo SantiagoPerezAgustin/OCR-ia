@@ -1,4 +1,4 @@
-﻿namespace BackOCRIa.DTO
+namespace BackOCRIa.DTO
 {
     public class JobSearchRequestDto
     {

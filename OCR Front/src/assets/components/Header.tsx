@@ -8,7 +8,7 @@ function Header() {
       transition={{ duration: 0.4 }}
       className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md"
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <div className="w-full flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20">
             <svg

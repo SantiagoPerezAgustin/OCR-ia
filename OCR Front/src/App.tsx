@@ -5,8 +5,8 @@ import "./App.css";
 
 function App() {
   return (
-    <div className="min-h-screen bg-slate-50">
-      <main>
+    <div className="min-h-screen w-full max-w-full bg-slate-950 overflow-x-hidden">
+      <main className="min-h-screen w-full max-w-full overflow-x-hidden">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route

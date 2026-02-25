@@ -9,7 +9,7 @@ function Footer() {
       transition={{ duration: 0.5 }}
       className="border-t border-slate-800 bg-slate-900/50"
     >
-      <div className="mx-auto max-w-6xl px-6 py-12">
+      <div className="w-full px-4 py-12">
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-emerald-500/20" />

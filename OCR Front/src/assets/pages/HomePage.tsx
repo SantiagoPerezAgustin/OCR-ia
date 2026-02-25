@@ -254,10 +254,10 @@ function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen w-full max-w-full bg-slate-950 overflow-x-hidden">
       <Header />
 
-      <main>
+      <main className="min-h-screen w-full max-w-full overflow-x-hidden">
         <motion.section
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -265,7 +265,7 @@ function HomePage() {
           className="relative overflow-hidden border-b border-slate-800/50"
         >
           <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent" />
-          <div className="relative mx-auto max-w-3xl px-6 py-20 text-center">
+          <div className="relative w-full px-4 py-20 text-center">
             <h2 className="mb-4 text-4xl font-bold tracking-tight text-white md:text-5xl">
               Procesa tus documentos con IA
             </h2>
@@ -276,7 +276,7 @@ function HomePage() {
           </div>
         </motion.section>
 
-        <section className="mx-auto max-w-3xl px-6 py-16">
+        <section className="w-full px-4 py-16">
           <DocumentUploader onFileSelected={handleFileSelected} />
 
           {selectedFile && (
@@ -388,7 +388,7 @@ function HomePage() {
           )}
         </section>
 
-        <section className="mx-auto max-w-3xl px-6 py-12 border-t border-slate-800/50">
+        <section className="w-full px-4 py-12 border-t border-slate-800/50">
           <h3 className="text-xl font-bold text-white mb-4">Candidatos guardados</h3>
           {candidatesLoading ? (
             <p className="text-slate-500 text-sm">Cargando candidatos…</p>
@@ -438,7 +438,7 @@ function HomePage() {
           id="features"
           className="border-t border-slate-800/50 bg-slate-900/20 py-16"
         >
-          <div className="mx-auto max-w-5xl px-6">
+          <div className="w-full px-4">
             <motion.h3
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -480,7 +480,7 @@ function HomePage() {
           id="how-it-works"
           className="border-t border-slate-800/50 py-16"
         >
-          <div className="mx-auto max-w-3xl px-6">
+          <div className="w-full px-4">
             <motion.h3
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}

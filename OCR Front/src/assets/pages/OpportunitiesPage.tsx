@@ -111,20 +111,30 @@ function OpportunitiesPage() {
         : "bg-slate-500/20 text-slate-400 border-slate-500/40";
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen w-full max-w-full bg-slate-950 text-white overflow-x-hidden">
       <Header />
 
-      <main>
+      <main className="min-h-screen w-full max-w-full overflow-x-hidden">
         {/* Hero tipo portal de empleo */}
         <section className="relative overflow-hidden border-b border-slate-800/50">
           <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent" />
-          <div className="relative mx-auto max-w-4xl px-6 py-12">
+          <div className="relative w-full px-4 py-12">
             <Link
               to="/"
               className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white mb-6 transition-colors"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
               Volver al inicio
             </Link>
@@ -132,7 +142,8 @@ function OpportunitiesPage() {
               Ofertas recomendadas para {displayName}
             </h1>
             <p className="mt-2 max-w-xl text-slate-400">
-              Empleos que encajan con tu perfil. Buscamos por ti y te mostramos el grado de afinidad con cada oferta.
+              Empleos que encajan con tu perfil. Buscamos por ti y te mostramos
+              el grado de afinidad con cada oferta.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <button
@@ -148,8 +159,18 @@ function OpportunitiesPage() {
                   </>
                 ) : (
                   <>
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
                     </svg>
                     Buscar ofertas para mi perfil
                   </>
@@ -162,7 +183,8 @@ function OpportunitiesPage() {
                     return `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(fallback)}`;
                   try {
                     const skills: string[] = JSON.parse(candidate.skillsJson);
-                    const keywords = skills.filter(Boolean).slice(0, 2).join(" ") || fallback;
+                    const keywords =
+                      skills.filter(Boolean).slice(0, 2).join(" ") || fallback;
                     return `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(keywords)}`;
                   } catch {
                     return `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(fallback)}`;
@@ -172,8 +194,12 @@ function OpportunitiesPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-xl border border-sky-500/50 bg-sky-600/20 px-6 py-3 text-base font-medium text-white hover:bg-sky-500/30 transition-colors"
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                <svg
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
                 </svg>
                 Buscar en LinkedIn
               </a>
@@ -182,7 +208,7 @@ function OpportunitiesPage() {
         </section>
 
         {/* Contenido principal */}
-        <section className="mx-auto max-w-4xl px-6 py-10">
+        <section className="w-full px-4 py-10">
           {error && (
             <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
               {error}
@@ -197,15 +223,27 @@ function OpportunitiesPage() {
           ) : offers.length === 0 ? (
             <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 p-10 text-center">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-700/50 text-slate-400">
-                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <svg
+                  className="h-8 w-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
                 </svg>
               </div>
               <h2 className="text-xl font-semibold text-white mb-2">
                 Aún no hay ofertas mostradas
               </h2>
               <p className="text-slate-400 max-w-md mx-auto mb-6">
-                Pulsa el botón «Buscar ofertas para mi perfil» para que busquemos empleos que encajen con tu CV. Te mostraremos la afinidad con cada oferta y un enlace para postularte.
+                Pulsa el botón «Buscar ofertas para mi perfil» para que
+                busquemos empleos que encajen con tu CV. Te mostraremos la
+                afinidad con cada oferta y un enlace para postularte.
               </p>
               <button
                 type="button"
@@ -219,7 +257,8 @@ function OpportunitiesPage() {
           ) : (
             <div className="space-y-1">
               <p className="text-slate-500 text-sm mb-6">
-                {offers.length} oferta{offers.length !== 1 ? "s" : ""} encontrada{offers.length !== 1 ? "s" : ""}
+                {offers.length} oferta{offers.length !== 1 ? "s" : ""}{" "}
+                encontrada{offers.length !== 1 ? "s" : ""}
               </p>
               <ul className="space-y-4">
                 {offers.map((offer, i) => (
@@ -235,9 +274,24 @@ function OpportunitiesPage() {
                         <p className="text-slate-400 mt-0.5">{offer.company}</p>
                         {offer.location && (
                           <p className="text-slate-500 text-sm mt-1 flex items-center gap-1">
-                            <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <svg
+                              className="h-4 w-4 shrink-0"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
                             </svg>
                             {offer.location}
                           </p>
@@ -247,19 +301,22 @@ function OpportunitiesPage() {
                             {offer.customPitch}
                           </p>
                         )}
-                        {offer.missingSkills && offer.missingSkills.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mt-3">
-                            <span className="text-slate-500 text-xs">Requisitos a reforzar:</span>
-                            {offer.missingSkills.map((s, j) => (
-                              <span
-                                key={j}
-                                className="rounded-md bg-slate-700/60 px-2 py-0.5 text-xs text-slate-400"
-                              >
-                                {s}
+                        {offer.missingSkills &&
+                          offer.missingSkills.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-3">
+                              <span className="text-slate-500 text-xs">
+                                Requisitos a reforzar:
                               </span>
-                            ))}
-                          </div>
-                        )}
+                              {offer.missingSkills.map((s, j) => (
+                                <span
+                                  key={j}
+                                  className="rounded-md bg-slate-700/60 px-2 py-0.5 text-xs text-slate-400"
+                                >
+                                  {s}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         {offer.description && (
                           <p className="text-slate-500 text-sm mt-2 line-clamp-2">
                             {offer.description}
@@ -270,7 +327,8 @@ function OpportunitiesPage() {
                         <span
                           className={`rounded-lg border px-3 py-1.5 text-sm font-medium ${matchBadgeClass(offer.matchPercentage)}`}
                         >
-                          {offer.matchPercentage}% afinidad · {matchLabel(offer.matchPercentage)}
+                          {offer.matchPercentage}% afinidad ·{" "}
+                          {matchLabel(offer.matchPercentage)}
                         </span>
                         {offer.url && (
                           <a
@@ -280,10 +338,20 @@ function OpportunitiesPage() {
                             className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors"
                           >
                             Ver oferta
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </a>
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                              />
+                            </svg>
+                          </a>
                         )}
                       </div>
                     </div>

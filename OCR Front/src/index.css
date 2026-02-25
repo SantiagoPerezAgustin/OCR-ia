@@ -1,7 +1,24 @@
 @import "tailwindcss";
 
 @layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
   body {
-    @apply bg-slate-50 text-slate-950 antialiased;
+    @apply bg-slate-950 text-white antialiased;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  /* Evitar que contenido ancho genere scroll horizontal */
+  #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 }

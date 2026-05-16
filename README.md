@@ -1,95 +1,240 @@
-# OCR con IA
+# OCR con IA — Procesamiento de CVs y matching de ofertas
 
-Aplicación full stack para procesar CVs (PDF e imágenes) con OCR, resumen automático, clasificación y **búsqueda de ofertas** usando IA (Mistral) y Adzuna.
+Aplicación **full stack** que automatiza el procesamiento de documentos (CVs, facturas, contratos) con **OCR** e **IA**, extrae datos estructurados del candidato y recomienda ofertas de empleo con **porcentaje de afinidad**, skills faltantes y pitch personalizado.
 
-## Estructura del proyecto
+Ideal para demostrar arquitectura de **microservicios**, integración **Python + .NET**, APIs de IA (**Mistral**) y un frontend moderno en **React**.
 
-- **OCR Front** – Frontend en React (Vite + TypeScript) con subida de archivos, listado de candidatos y búsqueda de ofertas recomendadas.
-- **ocr-python-service** – Microservicio en Python (FastAPI): OCR (Tesseract, PyPDF2), Mistral (resumen, clasificación, extracción de CV, matching con ofertas) y búsqueda en Adzuna.
-- **BackOCRIa** – API en .NET (ASP.NET Core 8) que actúa como gateway, persiste candidatos y ofertas y orquesta las llamadas al servicio Python.
+---
+
+## Problema que resuelve
+
+Procesar CVs y documentos a mano es lento y propenso a errores. Los reclutadores y candidatos necesitan:
+
+- Extraer texto de PDFs e imágenes de forma fiable.
+- Obtener un resumen y clasificación automática.
+- Estructurar nombre, contacto, experiencia, educación y habilidades.
+- Comparar el perfil con ofertas reales y ver qué encaja y qué falta.
+
+Este proyecto automatiza ese flujo de punta a punta.
+
+---
 
 ## Funcionalidades
 
-- **Extracción de texto (OCR)** – PDFs con texto nativo (PyPDF2) e imágenes (Tesseract).
-- **Resumen y clasificación** – Resumen del contenido y clasificación del documento (factura, contrato, CV, etc.) con Mistral.
-- **Extracción estructurada de CV** – Nombre, email, teléfono, experiencia, educación y habilidades.
-- **Búsqueda de ofertas** – A partir del CV del candidato se buscan ofertas en Adzuna (búsqueda amplia) y se calcula el match con IA (porcentaje, skills faltantes, pitch personalizado).
+| Área | Qué hace |
+|------|----------|
+| **OCR** | Extrae texto de PDFs (PyPDF2) e imágenes (Tesseract). |
+| **IA (Mistral)** | Resumen, clasificación del documento y extracción estructurada del CV. |
+| **Candidatos** | Guardar perfiles en base de datos (.NET + SQL Server). |
+| **Ofertas** | Búsqueda en Adzuna + matching CV ↔ oferta (% afinidad, skills faltantes, pitch). |
+| **UI** | Subida de archivos, listado de candidatos, página de ofertas recomendadas. |
 
-## Requisitos
+---
 
-- **Python 3.10+** (para el servicio OCR/IA)
-- **Node.js 18+** (para el frontend)
-- **Tesseract OCR** instalado ([descarga Windows](https://github.com/UB-Mannheim/tesseract/wiki))
-- **API Key de Mistral** ([mistral.ai](https://www.mistral.ai))
-- **Claves de Adzuna** (opcional, para búsqueda de ofertas): [developer.adzuna.com](https://developer.adzuna.com/)
+## Arquitectura
+
+```mermaid
+flowchart LR
+  subgraph front [Frontend]
+    React[React + Vite + TS]
+  end
+  subgraph net [API Gateway]
+    DotNet[ASP.NET Core 8]
+    DB[(SQL Server)]
+  end
+  subgraph py [Microservicio Python]
+    FastAPI[FastAPI]
+    OCR[Tesseract / PyPDF2]
+    Mistral[Mistral API]
+    Adzuna[Adzuna API]
+  end
+  React --> DotNet
+  React --> FastAPI
+  DotNet --> DB
+  DotNet --> FastAPI
+  FastAPI --> OCR
+  FastAPI --> Mistral
+  FastAPI --> Adzuna
+```
+
+- **OCR Front** — Interfaz de usuario (React, TypeScript, Tailwind, Framer Motion).
+- **ocr-python-service** — OCR, IA y búsqueda de empleo (FastAPI).
+- **BackOCRIa** — API REST, persistencia y orquestación (.NET 8).
+
+---
+
+## Stack tecnológico
+
+| Capa | Tecnologías |
+|------|-------------|
+| Frontend | React 18, TypeScript, Vite, Tailwind CSS, Framer Motion, React Router |
+| Servicio IA / OCR | Python 3.10+, FastAPI, Tesseract, PyPDF2, Mistral API, Adzuna API |
+| API / datos | .NET 8, ASP.NET Core, Entity Framework Core, SQL Server |
+| Patrones | Microservicios, REST, separación de responsabilidades, DTOs |
+
+---
+
+## Estructura del repositorio
+
+```
+OCR ia/
+├── OCR Front/              # Frontend React (puerto 5173)
+├── ocr-python-service/     # Microservicio Python (puerto 8000)
+│   ├── app.py
+│   ├── services/
+│   │   ├── ocr_service.py
+│   │   ├── ai_service.py
+│   │   └── jobs_service.py
+│   └── requirements.txt
+└── BackOCRIa/
+    └── BackOCRIa/          # API .NET (puerto 5052 / 7223)
+        ├── Controllers/
+        ├── Service/
+        ├── Models/
+        └── Data/
+```
+
+---
+
+## Requisitos previos
+
+- **Python 3.10+**
+- **Node.js 18+**
+- **.NET 8 SDK**
+- **SQL Server** (LocalDB, SQL Express o instancia local) para candidatos y ofertas guardadas
+- **[Tesseract OCR](https://github.com/UB-Mannheim/tesseract/wiki)** instalado (Windows: añadir al PATH o configurar ruta en `ocr_service.py`)
+- **API Key de [Mistral](https://console.mistral.ai/)** (obligatoria)
+- **Claves de [Adzuna](https://developer.adzuna.com/)** (opcional; sin ellas la búsqueda de ofertas devuelve lista vacía)
+
+---
 
 ## Configuración
 
-### 1. Servicio Python (OCR + IA + ofertas)
+### 1. Servicio Python (`ocr-python-service`)
 
 ```bash
 cd ocr-python-service
 python -m venv venv
-# Windows:
+
+# Windows
 venv\Scripts\activate
-# Linux/Mac:
+
+# Linux / macOS
 # source venv/bin/activate
 
 pip install -r requirements.txt
 ```
 
-Crea un archivo `.env` en `ocr-python-service/` con:
+Copia `.env.example` a `.env` y completa:
 
-```
-MISTRAL_API_KEY=tu_api_key_aqui
+```env
+MISTRAL_API_KEY=tu_clave_mistral
 ADZUNA_APP_ID=tu_app_id
 ADZUNA_APP_KEY=tu_app_key
 ```
 
-Sin `ADZUNA_APP_ID`/`ADZUNA_APP_KEY` el resto del flujo funciona; la búsqueda de ofertas devolverá lista vacía.
+### 2. API .NET (`BackOCRIa`)
 
-En Windows, si Tesseract no está en el PATH, configura la ruta en `services/ocr_service.py` (línea `tesseract_cmd`).
+Ajusta la cadena de conexión en `BackOCRIa/BackOCRIa/appsettings.Development.json`:
 
-### 2. Frontend
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "Server=TU_SERVIDOR;Database=OcrIaDb;Trusted_Connection=True;TrustServerCertificate=True;"
+},
+"PythonService": {
+  "BaseUrl": "http://localhost:8000"
+}
+```
+
+Aplica migraciones (desde la carpeta del proyecto .NET):
+
+```bash
+cd BackOCRIa/BackOCRIa
+dotnet ef database update
+```
+
+*(Si no tienes la herramienta EF: `dotnet tool install --global dotnet-ef`)*
+
+### 3. Frontend (`OCR Front`)
 
 ```bash
 cd "OCR Front"
 npm install
-npm run dev
 ```
 
-El frontend llama por defecto a `http://localhost:8000` (servicio Python). No es necesario levantar .NET para probar.
+---
 
-### 3. (Opcional) API .NET
+## Cómo ejecutar (flujo completo)
+
+Abre **tres terminales**:
+
+**Terminal 1 — Python**
+
+```bash
+cd ocr-python-service
+venv\Scripts\activate
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Terminal 2 — .NET**
 
 ```bash
 cd BackOCRIa/BackOCRIa
 dotnet run
 ```
 
-Configura `PythonService:BaseUrl` en `appsettings.Development.json` si usas el backend .NET como intermediario.
+**Terminal 3 — Frontend**
 
-## Cómo ejecutar
+```bash
+cd "OCR Front"
+npm run dev
+```
 
-1. **Solo frontend + Python** (recomendado para desarrollo):
+Abre **http://localhost:5173**:
 
-   ```bash
-   # Terminal 1 – Servicio Python
-   cd ocr-python-service && venv\Scripts\activate && uvicorn app:app --reload --host 0.0.0.0 --port 8000
+1. Sube un CV (PDF o imagen) y pulsa **Procesar documento**.
+2. Revisa texto, resumen, clasificación y datos estructurados.
+3. Pulsa **Guardar candidato**.
+4. En **Candidatos guardados**, entra en **Ver oportunidades**.
+5. Pulsa **Buscar ofertas para mi perfil** para obtener recomendaciones con % de match.
 
-   # Terminal 2 – Frontend
-   cd "OCR Front" && npm run dev
-   ```
+> **Solo desarrollo rápido (sin .NET):** puedes usar solo Python + frontend; el procesamiento OCR/IA funciona contra `http://localhost:8000`. Guardar candidatos y ofertas requiere la API .NET.
 
-2. Abre en el navegador la URL del frontend (ej. `http://localhost:5173`), sube un PDF o imagen y pulsa **Procesar documento**. Desde la ficha del candidato puedes usar **Buscar ofertas** para obtener recomendaciones con match por IA.
+---
 
-## Stack
+## Endpoints principales
 
-| Parte        | Tecnologías                                                |
-| ------------ | ---------------------------------------------------------- |
-| Frontend     | React, TypeScript, Vite, Tailwind, Framer Motion           |
-| Servicio IA  | Python, FastAPI, Tesseract, PyPDF2, Mistral API, Adzuna    |
-| API          | .NET 8, ASP.NET Core                                       |
+### Python (`http://localhost:8000`)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `POST` | `/process` | Sube PDF/imagen → OCR + resumen + clasificación + datos estructurados del CV |
+| `POST` | `/jobs/search` | Body: `summary`, `skills`, `current_role` → ofertas Adzuna + match IA |
+| `GET` | `/health` | Estado del servicio |
+
+### .NET (`http://localhost:5052` o `https://localhost:7223`)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `POST` | `/api/candidates` | Guardar candidato |
+| `GET` | `/api/candidates` | Listar candidatos |
+| `GET` | `/api/candidates/{id}` | Obtener candidato |
+| `DELETE` | `/api/candidates/{id}` | Eliminar candidato |
+| `GET` | `/api/candidates/{id}/recommendations` | Ofertas guardadas |
+| `POST` | `/api/candidates/{id}/recommendations` | Buscar ofertas (Python) y guardar |
+
+---
+
+## Qué demuestra este proyecto (para reclutadores)
+
+- Desarrollo **full stack** (React + Python + C#).
+- **Arquitectura de microservicios** y comunicación HTTP entre servicios.
+- Integración con **APIs de IA** (Mistral) y APIs de terceros (Adzuna).
+- **OCR** en producción (Tesseract, PDFs).
+- **Persistencia** con EF Core y SQL Server.
+- UX moderna (Tailwind, animaciones, flujo candidato → ofertas).
+
+---
 
 ## Licencia
 
